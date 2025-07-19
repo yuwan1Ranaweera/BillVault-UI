@@ -16,6 +16,9 @@ import { VaultAnimationScreen } from "../screens/vault-animation-screen"
 import { SearchScreen } from "../screens/search-screen"
 import { FilesScreen } from "../screens/files-screen"
 import { ProfileScreen } from "../screens/profile-screen"
+import { TranslateOptionsScreen } from "../screens/translate-options-screen"
+import { UploadScreen } from "../screens/upload-screen"
+import { BillDetailsScreen } from "../screens/bill-details-screen" // Import BillDetailsScreen
 
 type Screen =
   | "welcome"
@@ -33,11 +36,15 @@ type Screen =
   | "search"
   | "files"
   | "profile"
+  | "translate-options"
+  | "upload"
+  | "bill-details" // Add bill-details screen type
 
 export default function BillVaultApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("welcome")
   const [accountType, setAccountType] = useState<"individual" | "business">("individual")
   const [scannedBillData, setScannedBillData] = useState<any>(null)
+  const [selectedBillData, setSelectedBillData] = useState<any>(null) // New state for bill details
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -111,26 +118,34 @@ export default function BillVaultApp() {
       case "individual-home":
         return (
           <HomeScreen
-            onScan={() => alert("Individual quick scan functionality")}
             onOCRScan={() => setCurrentScreen("ocr-scan")}
             onQRScan={() => setCurrentScreen("qr-scan")}
-            onBillDetails={() => alert("Individual bill details functionality")}
+            onBillDetails={(billData) => {
+              setSelectedBillData(billData)
+              setCurrentScreen("bill-details")
+            }}
             onSearch={() => setCurrentScreen("search")}
             onFiles={() => setCurrentScreen("files")}
             onProfile={() => setCurrentScreen("profile")}
+            onTranslate={() => setCurrentScreen("translate-options")}
+            onUploadFile={() => setCurrentScreen("upload")}
             accountType="individual"
           />
         )
       case "business-home":
         return (
           <HomeScreen
-            onScan={() => alert("Business scan functionality")}
             onOCRScan={() => setCurrentScreen("ocr-scan")}
             onQRScan={() => setCurrentScreen("qr-scan")}
-            onBillDetails={() => alert("Business bill details functionality")}
+            onBillDetails={(billData) => {
+              setSelectedBillData(billData)
+              setCurrentScreen("bill-details")
+            }}
             onSearch={() => setCurrentScreen("search")}
             onFiles={() => setCurrentScreen("files")}
             onProfile={() => setCurrentScreen("profile")}
+            onTranslate={() => setCurrentScreen("translate-options")}
+            onUploadFile={() => setCurrentScreen("upload")}
             accountType="business"
           />
         )
@@ -176,6 +191,13 @@ export default function BillVaultApp() {
           <FilesScreen
             onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
             accountType={accountType}
+            onFileSelectedForTranslation={(fileData) => {
+              setSelectedBillData({
+                ...fileData,
+                translatedText: `This is a simulated translation of the bill for ${fileData.name}. It was issued on ${fileData.date} for a total of ${fileData.total}. The original category was ${fileData.category}.`,
+              })
+              setCurrentScreen("bill-details")
+            }}
           />
         )
       case "profile":
@@ -183,6 +205,34 @@ export default function BillVaultApp() {
           <ProfileScreen
             onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
             onLogout={() => setCurrentScreen("welcome")}
+            accountType={accountType}
+          />
+        )
+      case "translate-options":
+        return (
+          <TranslateOptionsScreen
+            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            onTranslateExisting={() => setCurrentScreen("files")} // Navigate to files for selection
+            onScanNewForTranslation={() => setCurrentScreen("ocr-scan")} // Navigate to OCR scan for translation
+            accountType={accountType}
+          />
+        )
+      case "upload":
+        return (
+          <UploadScreen
+            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            onUploadComplete={(billData) => {
+              setScannedBillData(billData)
+              setCurrentScreen("vault-animation")
+            }}
+            accountType={accountType}
+          />
+        )
+      case "bill-details":
+        return (
+          <BillDetailsScreen
+            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            billData={selectedBillData} // Pass the selected bill data
             accountType={accountType}
           />
         )
