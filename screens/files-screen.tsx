@@ -9,9 +9,16 @@ import { useState } from "react"
 interface FilesScreenProps {
   onBack: () => void
   accountType?: "individual" | "business"
+  selectMode?: "translate" // New prop to indicate selection mode
+  onFileSelectedForTranslation?: (fileData: any) => void // New callback for translation selection
 }
 
-export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenProps) {
+export function FilesScreen({
+  onBack,
+  accountType = "individual",
+  selectMode,
+  onFileSelectedForTranslation,
+}: FilesScreenProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const isIndividual = accountType === "individual"
 
@@ -24,6 +31,15 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: "Food & Dining",
       color: "from-blue-500 to-cyan-500",
+      merchant: "SuperMart",
+      total: "$45.67",
+      location: "123 Main St",
+      receiptId: "#12345",
+      items: [
+        { name: "Organic Bananas", qty: "2 lbs", price: "$3.98" },
+        { name: "Whole Milk", qty: "1 gal", price: "$4.29" },
+        { name: "Bread Loaf", qty: "1 pc", price: "$2.49" },
+      ],
     },
     {
       id: 2,
@@ -33,6 +49,11 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: isIndividual ? "Utilities" : "Electronics",
       color: "from-yellow-500 to-orange-500",
+      merchant: "PowerCorp",
+      total: isIndividual ? "$89.23" : "$2,456.78",
+      location: "Online",
+      receiptId: "#67890",
+      items: [{ name: "Electricity Usage", qty: "1 month", price: "$89.23" }],
     },
     {
       id: 3,
@@ -42,6 +63,11 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: isIndividual ? "Healthcare" : "Pharmacy",
       color: "from-emerald-500 to-teal-500",
+      merchant: "HealthCare+",
+      total: isIndividual ? "$156.00" : "$89.45",
+      location: "456 Oak Ave",
+      receiptId: "#11223",
+      items: [{ name: "Consultation Fee", qty: "1", price: "$156.00" }],
     },
     {
       id: 4,
@@ -51,6 +77,11 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: isIndividual ? "Utilities" : "Technology",
       color: "from-purple-500 to-pink-500",
+      merchant: "Telecom Inc.",
+      total: "$75.00",
+      location: "Online",
+      receiptId: "#2001",
+      items: [{ name: "Monthly Plan", qty: "1", price: "$75.00" }],
     },
     {
       id: 5,
@@ -60,6 +91,11 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: "Food & Dining",
       color: "from-red-500 to-orange-500",
+      merchant: "Taste of Italy",
+      total: "$62.50",
+      location: "789 Elm St",
+      receiptId: "#3001",
+      items: [{ name: "Dinner for Two", qty: "1", price: "$62.50" }],
     },
     {
       id: 6,
@@ -69,8 +105,23 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
       type: "PDF",
       category: "Transportation",
       color: "from-indigo-500 to-blue-500",
+      merchant: "Speedy Gas",
+      total: "$55.00",
+      location: "101 Highway",
+      receiptId: "#4001",
+      items: [{ name: "Gasoline", qty: "15 gal", price: "$55.00" }],
     },
   ]
+
+  const handleFileClick = (file: any) => {
+    if (selectMode === "translate" && onFileSelectedForTranslation) {
+      onFileSelectedForTranslation(file)
+    } else {
+      // Default behavior, if any, or simply do nothing if no default action is intended
+      // For now, we'll just log it or keep it as a placeholder
+      console.log("File clicked in normal mode:", file.name)
+    }
+  }
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 to-purple-50 relative overflow-hidden">
@@ -82,7 +133,9 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
           <Button variant="ghost" size="sm" onClick={onBack} className="p-2 h-auto rounded-full hover:bg-slate-100">
             <ArrowLeft className="w-6 h-6 text-slate-700" />
           </Button>
-          <h1 className="text-lg font-semibold text-slate-900">My Files</h1>
+          <h1 className="text-lg font-semibold text-slate-900">
+            {selectMode === "translate" ? "Select Bill to Translate" : "My Files"}
+          </h1>
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -128,6 +181,7 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
                 <Card
                   key={file.id}
                   className="p-4 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => handleFileClick(file)}
                 >
                   <div className="text-center">
                     <div
@@ -150,7 +204,8 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
               {files.map((file) => (
                 <Card
                   key={file.id}
-                  className="p-4 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="p-4 sm:p-1 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => handleFileClick(file)}
                 >
                   <div className="flex items-center space-x-4">
                     <div
@@ -160,7 +215,7 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
                         <FileText className="w-5 h-5 text-slate-600" />
                       </div>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-grow">
                       <h4 className="font-semibold text-slate-900">{file.name}</h4>
                       <div className="flex items-center space-x-2 text-sm text-slate-500">
                         <span>{file.date}</span>
@@ -172,17 +227,19 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm" className="p-2 h-auto">
-                        <Download className="w-4 h-4 text-slate-400" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="p-2 h-auto">
-                        <Share className="w-4 h-4 text-slate-400" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="p-2 h-auto">
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </Button>
-                    </div>
+                    {selectMode !== "translate" && ( // Only show action buttons if not in translate select mode
+                      <div className="flex items-center space-x-1 flex-shrink-0">
+                        <Button variant="ghost" size="sm" className="p-0.5 h-auto">
+                          <Download className="w-4 h-4 text-slate-400" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="p-0.5 h-auto">
+                          <Share className="w-4 h-4 text-slate-400" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="p-0.5 h-auto">
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
@@ -193,3 +250,4 @@ export function FilesScreen({ onBack, accountType = "individual" }: FilesScreenP
     </div>
   )
 }
+
