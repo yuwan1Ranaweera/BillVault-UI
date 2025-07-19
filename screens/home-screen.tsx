@@ -7,7 +7,6 @@ import {
   Search,
   Plus,
   User,
-  Camera,
   Upload,
   FileText,
   TrendingUp,
@@ -22,27 +21,75 @@ import {
 import { StatusBar } from "../components/status-bar"
 
 interface HomeScreenProps {
-  onScan: () => void
   onOCRScan: () => void
   onQRScan: () => void
-  onBillDetails: () => void
+  onBillDetails: (billData: any) => void // Modified to pass billData
   onSearch: () => void
   onFiles: () => void
   onProfile: () => void
+  onTranslate: () => void // New prop for translate feature
+  onUploadFile: () => void // New prop for upload feature
   accountType?: "individual" | "business"
 }
 
 export function HomeScreen({
-  onScan,
   onOCRScan,
   onQRScan,
   onBillDetails,
   onSearch,
   onFiles,
   onProfile,
+  onTranslate, // Destructure new prop
+  onUploadFile, // Destructure new prop
   accountType = "individual",
 }: HomeScreenProps) {
   const isIndividual = accountType === "individual"
+
+  const recentBills = [
+    {
+      id: 1,
+      name: isIndividual ? "Grocery Receipt" : "Customer Receipt #001",
+      date: "2 hours ago",
+      amount: "$45.67",
+      type: "receipt",
+      color: "from-blue-500 to-cyan-500",
+      category: "Food & Dining",
+      merchant: "SuperMart",
+      location: "123 Main St",
+      receiptId: "#12345",
+      items: [
+        { name: "Organic Bananas", qty: "2 lbs", price: "$3.98" },
+        { name: "Whole Milk", qty: "1 gal", price: "$4.29" },
+        { name: "Bread Loaf", qty: "1 pc", price: "$2.49" },
+      ],
+    },
+    {
+      id: 2,
+      name: isIndividual ? "Electricity Bill" : "Bulk Upload - Electronics",
+      date: "1 day ago",
+      amount: isIndividual ? "$89.23" : "$2,456.78",
+      type: "bill",
+      color: "from-yellow-500 to-orange-500",
+      category: isIndividual ? "Utilities" : "Electronics",
+      merchant: "PowerCorp",
+      location: "Online",
+      receiptId: "#67890",
+      items: [{ name: "Electricity Usage", qty: "1 month", price: "$89.23" }],
+    },
+    {
+      id: 3,
+      name: isIndividual ? "Medical Invoice" : "QR Shared - Pharmacy",
+      date: "3 days ago",
+      amount: isIndividual ? "$156.00" : "$89.45",
+      type: "invoice",
+      color: "from-emerald-500 to-teal-500",
+      category: isIndividual ? "Healthcare" : "Pharmacy",
+      merchant: "HealthCare+",
+      location: "456 Oak Ave",
+      receiptId: "#11223",
+      items: [{ name: "Consultation Fee", qty: "1", price: "$156.00" }],
+    },
+  ]
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 to-purple-50 relative overflow-hidden">
@@ -91,8 +138,9 @@ export function HomeScreen({
             type="text"
             placeholder="Search bills, receipts, warranties..."
             onClick={onSearch}
-            className="w-full h-12 pl-12 pr-4 rounded-2xl border border-slate-200 bg-white focus:ring-2 focus:border-transparent shadow-sm cursor-pointer"
-            style={{ focusRingColor: isIndividual ? "#9B7EBD" : "#10b981" }}
+            className={`w-full h-12 pl-12 pr-4 rounded-2xl border border-slate-200 bg-white focus:ring-2 focus:border-transparent shadow-sm cursor-pointer ${
+              isIndividual ? "focus:ring-purple-500" : "focus:ring-emerald-500"
+            }`}
             readOnly
           />
         </div>
@@ -199,19 +247,11 @@ export function HomeScreen({
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              {" "}
+              {/* Changed to 2 columns */}
               <Button
-                onClick={onScan}
-                className="flex flex-col items-center p-4 h-auto bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                variant="ghost"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-2 shadow-lg">
-                  <Camera className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-slate-900 font-medium text-xs">Quick Scan</span>
-              </Button>
-
-              <Button
+                onClick={onTranslate} // Use the new onTranslate prop
                 className="flex flex-col items-center p-4 h-auto bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-sm transition-all duration-200 hover:scale-[1.02]"
                 variant="ghost"
               >
@@ -220,15 +260,15 @@ export function HomeScreen({
                 </div>
                 <span className="text-slate-900 font-medium text-xs">Translate</span>
               </Button>
-
               <Button
+                onClick={onUploadFile} // Use the new onUploadFile prop
                 className="flex flex-col items-center p-4 h-auto bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-sm transition-all duration-200 hover:scale-[1.02]"
                 variant="ghost"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-2 shadow-lg">
                   <Upload className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-slate-900 font-medium text-xs">Upload</span>
+                <span className="text-slate-900 font-medium text-xs">Upload Bill</span>
               </Button>
             </div>
           </div>
@@ -248,36 +288,11 @@ export function HomeScreen({
             </div>
 
             <div className="space-y-3">
-              {[
-                {
-                  name: isIndividual ? "Grocery Receipt" : "Customer Receipt #001",
-                  date: "2 hours ago",
-                  amount: "$45.67",
-                  type: "receipt",
-                  color: "from-blue-500 to-cyan-500",
-                  category: "Food & Dining",
-                },
-                {
-                  name: isIndividual ? "Electricity Bill" : "Bulk Upload - Electronics",
-                  date: "1 day ago",
-                  amount: isIndividual ? "$89.23" : "$2,456.78",
-                  type: "bill",
-                  color: "from-yellow-500 to-orange-500",
-                  category: isIndividual ? "Utilities" : "Electronics",
-                },
-                {
-                  name: isIndividual ? "Medical Invoice" : "QR Shared - Pharmacy",
-                  date: "3 days ago",
-                  amount: isIndividual ? "$156.00" : "$89.45",
-                  type: "invoice",
-                  color: "from-emerald-500 to-teal-500",
-                  category: isIndividual ? "Healthcare" : "Pharmacy",
-                },
-              ].map((doc, index) => (
+              {recentBills.map((doc) => (
                 <Card
-                  key={index}
+                  key={doc.id}
                   className="p-4 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                  onClick={onBillDetails}
+                  onClick={() => onBillDetails(doc)} // Pass the specific document data
                 >
                   <div className="flex items-center space-x-4">
                     <div
