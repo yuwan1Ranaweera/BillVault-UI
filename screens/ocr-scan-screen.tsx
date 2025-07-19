@@ -10,9 +10,15 @@ interface OCRScanScreenProps {
   onBack: () => void
   onScanComplete: (billData: any) => void
   accountType?: "individual" | "business"
+  translateMode?: boolean // New prop for translation mode
 }
 
-export function OCRScanScreen({ onBack, onScanComplete, accountType = "individual" }: OCRScanScreenProps) {
+export function OCRScanScreen({
+  onBack,
+  onScanComplete,
+  accountType = "individual",
+  translateMode = false,
+}: OCRScanScreenProps) {
   const [isScanning, setIsScanning] = useState(false)
   const [scanComplete, setScanComplete] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState("en")
@@ -55,6 +61,9 @@ export function OCRScanScreen({ onBack, onScanComplete, accountType = "individua
             ],
         confidence: 0.94,
         language: selectedLanguage,
+        translatedText: translateMode
+          ? "This is a simulated translation of the bill content into English. The original bill was for groceries at SuperMart, totaling $45.67 on December 10, 2024. Items included bananas, milk, bread, and mixed vegetables."
+          : undefined, // Add translated text if in translate mode
       }
       setExtractedData(mockData)
     }, 3000)
@@ -151,6 +160,12 @@ export function OCRScanScreen({ onBack, onScanComplete, accountType = "individua
                     {languages.find((l) => l.code === extractedData.language)?.name}
                   </span>
                 </div>
+                {translateMode && extractedData.translatedText && (
+                  <div className="border-t border-slate-200 pt-4 mt-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Translated Text:</h4>
+                    <p className="text-slate-700 italic">{extractedData.translatedText}</p>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -184,7 +199,7 @@ export function OCRScanScreen({ onBack, onScanComplete, accountType = "individua
                     : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                 }}
               >
-                Save to BillVault
+                {translateMode ? "Save Translated Bill" : "Save to BillVault"}
               </Button>
 
               <Button
@@ -220,7 +235,7 @@ export function OCRScanScreen({ onBack, onScanComplete, accountType = "individua
         <Button variant="ghost" size="sm" onClick={onBack} className="p-2 h-auto">
           <ArrowLeft className="w-6 h-6 text-white" />
         </Button>
-        <h1 className="text-white font-semibold">AI OCR Scanner</h1>
+        <h1 className="text-white font-semibold">{translateMode ? "Scan for Translation" : "AI OCR Scanner"}</h1>
         <Button variant="ghost" size="sm" className="p-2 h-auto">
           <X className="w-6 h-6 text-white" />
         </Button>
