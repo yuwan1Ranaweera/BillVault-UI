@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { StatusBar } from "../components/status-bar"
 import { Scan, Languages, QrCode } from "lucide-react"
+import Image from "next/image" // Import the Image component from Next.js
 
 interface WelcomeScreenProps {
   onLogin: () => void
@@ -13,7 +14,7 @@ export function WelcomeScreen({ onLogin, onSignUp }: WelcomeScreenProps) {
   return (
     <div className="w-full h-full relative overflow-hidden">
       {/* Custom Brand Background */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #3B1E54 0%, #9B7EBD 100%)" }}>
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #2E073F 0%, #7A1CAC 100%)" }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
         {/* Floating Orbs */}
@@ -38,18 +39,27 @@ export function WelcomeScreen({ onLogin, onSignUp }: WelcomeScreenProps) {
         {/* Header */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 text-center">
           {/* Logo/Icon */}
-          <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-3xl flex items-center justify-center mb-8 shadow-2xl ring-1 ring-white/30">
-            <div className="text-3xl font-bold text-white">BV</div>
-          </div>
+          <Image
+            src="/images/logo.png" // Path to your updated logo
+            alt="BillVault App Logo - Stylized Bill Icon" // Descriptive alt text for accessibility
+            width={96} // Set appropriate width for your logo
+            height={96} // Set appropriate height for your logo
+            className="object-contain mb-8 rounded-3xl shadow-2xl ring-1 ring-white/30" // Maintain aspect ratio and add styling
+            priority // Prioritize loading for LCP
+          />
 
           <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">BillVault</h1>
           <p className="text-xl text-white/90 mb-2 font-medium">Smart Document Management</p>
-          <p className="text-lg text-white/70 mb-12 leading-relaxed px-4">
+          <p className="text-lg text-white/70 mb-8 leading-relaxed px-4">
+            {" "}
+            {/* Reduced mb-12 to mb-8 */}
             OCR scanning, QR codes, and AI-powered bill organization
           </p>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {/* Feature Pills - Reverted to original horizontal alignment */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {" "}
+            {/* Reduced mb-12 to mb-8 */}
             <div className="flex items-center bg-white/20 backdrop-blur-xl rounded-full px-4 py-2 ring-1 ring-white/30">
               <Scan className="w-4 h-4 text-white mr-2" />
               <span className="text-white text-sm font-medium">OCR Scan</span>
@@ -65,7 +75,7 @@ export function WelcomeScreen({ onLogin, onSignUp }: WelcomeScreenProps) {
           </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Bottom Section - Moved up by adjusting margins above */}
         <div className="p-6 space-y-4">
           <Button
             onClick={onSignUp}
