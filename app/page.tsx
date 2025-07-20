@@ -18,7 +18,8 @@ import { FilesScreen } from "../screens/files-screen"
 import { ProfileScreen } from "../screens/profile-screen"
 import { TranslateOptionsScreen } from "../screens/translate-options-screen"
 import { UploadScreen } from "../screens/upload-screen"
-import { BillDetailsScreen } from "../screens/bill-details-screen" // Import BillDetailsScreen
+import { BillDetailsScreen } from "../screens/bill-details-screen"
+import { ScanUploadOptionsScreen } from "../screens/scan-upload-options-screen" // Import new screen
 
 type Screen =
   | "welcome"
@@ -38,13 +39,18 @@ type Screen =
   | "profile"
   | "translate-options"
   | "upload"
-  | "bill-details" // Add bill-details screen type
+  | "bill-details"
+  | "scan-upload-options" // Add new screen type
 
 export default function BillVaultApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("welcome")
   const [accountType, setAccountType] = useState<"individual" | "business">("individual")
   const [scannedBillData, setScannedBillData] = useState<any>(null)
-  const [selectedBillData, setSelectedBillData] = useState<any>(null) // New state for bill details
+  const [selectedBillData, setSelectedBillData] = useState<any>(null)
+  const [documentTypeForScanOrUpload, setDocumentTypeForScanOrUpload] = useState<
+    "bill" | "warranty" | "gift-voucher" | null
+  >(null)
+  const [actionTypeForScanOrUpload, setActionTypeForScanOrUpload] = useState<"scan" | "upload" | null>(null)
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -118,7 +124,7 @@ export default function BillVaultApp() {
       case "individual-home":
         return (
           <HomeScreen
-            onOCRScan={() => setCurrentScreen("ocr-scan")}
+            onOCRScan={() => setCurrentScreen("scan-upload-options")} // Navigate to options
             onQRScan={() => setCurrentScreen("qr-scan")}
             onBillDetails={(billData) => {
               setSelectedBillData(billData)
@@ -128,14 +134,14 @@ export default function BillVaultApp() {
             onFiles={() => setCurrentScreen("files")}
             onProfile={() => setCurrentScreen("profile")}
             onTranslate={() => setCurrentScreen("translate-options")}
-            onUploadFile={() => setCurrentScreen("upload")}
+            onUploadFile={() => setCurrentScreen("scan-upload-options")} // Navigate to options
             accountType="individual"
           />
         )
       case "business-home":
         return (
           <HomeScreen
-            onOCRScan={() => setCurrentScreen("ocr-scan")}
+            onOCRScan={() => setCurrentScreen("scan-upload-options")} // Navigate to options
             onQRScan={() => setCurrentScreen("qr-scan")}
             onBillDetails={(billData) => {
               setSelectedBillData(billData)
@@ -145,19 +151,37 @@ export default function BillVaultApp() {
             onFiles={() => setCurrentScreen("files")}
             onProfile={() => setCurrentScreen("profile")}
             onTranslate={() => setCurrentScreen("translate-options")}
-            onUploadFile={() => setCurrentScreen("upload")}
+            onUploadFile={() => setCurrentScreen("scan-upload-options")} // Navigate to options
             accountType="business"
+          />
+        )
+      case "scan-upload-options":
+        return (
+          <ScanUploadOptionsScreen
+            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            onSelectOption={(type, action) => {
+              setDocumentTypeForScanOrUpload(type)
+              setActionTypeForScanOrUpload(action)
+              if (action === "scan") {
+                setCurrentScreen("ocr-scan")
+              } else {
+                setCurrentScreen("upload")
+              }
+            }}
+            accountType={accountType}
           />
         )
       case "ocr-scan":
         return (
           <OCRScanScreen
-            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            onBack={() => setCurrentScreen("scan-upload-options")} // Go back to options
             onScanComplete={(billData) => {
               setScannedBillData(billData)
               setCurrentScreen("vault-animation")
             }}
             accountType={accountType}
+            // You can pass documentTypeForScanOrUpload here if OCRScanScreen needs to adapt
+            // documentType={documentTypeForScanOrUpload}
           />
         )
       case "qr-scan":
@@ -212,27 +236,29 @@ export default function BillVaultApp() {
         return (
           <TranslateOptionsScreen
             onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
-            onTranslateExisting={() => setCurrentScreen("files")} // Navigate to files for selection
-            onScanNewForTranslation={() => setCurrentScreen("ocr-scan")} // Navigate to OCR scan for translation
+            onTranslateExisting={() => setCurrentScreen("files")}
+            onScanNewForTranslation={() => setCurrentScreen("ocr-scan")}
             accountType={accountType}
           />
         )
       case "upload":
         return (
           <UploadScreen
-            onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
+            onBack={() => setCurrentScreen("scan-upload-options")} // Go back to options
             onUploadComplete={(billData) => {
               setScannedBillData(billData)
               setCurrentScreen("vault-animation")
             }}
             accountType={accountType}
+            // You can pass documentTypeForScanOrUpload here if UploadScreen needs to adapt
+            // documentType={documentTypeForScanOrUpload}
           />
         )
       case "bill-details":
         return (
           <BillDetailsScreen
             onBack={() => setCurrentScreen(accountType === "individual" ? "individual-home" : "business-home")}
-            billData={selectedBillData} // Pass the selected bill data
+            billData={selectedBillData}
             accountType={accountType}
           />
         )
